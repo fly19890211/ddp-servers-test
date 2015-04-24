@@ -1,5 +1,4 @@
 # ddp-servers-test
-================
 
 Revised based on https://github.com/camilosw/ddp-servers-test
 
