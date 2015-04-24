@@ -1,7 +1,24 @@
 <head>
-  <title>server-b</title>
+    <title>server-B</title>
 </head>
 
 <body>
-  Server B
+    {{> testList }}
 </body>
+
+<template name="testList">
+    Server B
+
+    <a href="#" class="insert">Insert</a>
+    <a href="#" class="delete">Delete</a>
+
+    {{#each tests}}
+        {{> testItem}}
+    {{/each}}
+</template>
+
+<template name="testItem">
+    <li>
+        {{name}}, {{author}}
+    </li>
+</template>
