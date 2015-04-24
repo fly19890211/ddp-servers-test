@@ -14,8 +14,9 @@ Server B as Data Source, if some data changed, should be send to Server A.
     cd server-b
     meteor --port 3003
     
-    
-## Insert A <--> B
+## A <--> B
+
+### Insert A <--> B
 
 Server A can insert data on A, and can be subscribed by B
 
@@ -25,6 +26,21 @@ After connection to A is restored, the data on B will send to A automatically.
 
 Server-A publish data:
 
+Server-A allow remove:
+
+    /////////////////////
+    // Code of server A
+    /////////////////////
+    
+    Items.allow({
+        insert: function () {
+            return true;
+        },
+        remove: function () {
+            return true;
+        }
+    });
+    
     if (Meteor.isServer) {
         Meteor.publish('remote-items', function () {
             return Items.find();
@@ -33,6 +49,10 @@ Server-A publish data:
 
 Server-B subscribe remote data on Server A:
 
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     // Connect to Server A
     remote = DDP.connect('http://localhost:3000/');
     ServerAItems = new Meteor.Collection('items', {connection: remote});
@@ -58,6 +78,10 @@ Server-B subscribe remote data on Server A:
 
 Server-B subscribe local data and send to Server A:
     
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     Items.find().observe({
         added: function (item) {
             console.log('-- local item added--');
@@ -71,24 +95,32 @@ Server-B subscribe local data and send to Server A:
         ...
     });
 
-## Delete A --> B
+### Delete A --> B
 
 Server A can delete all data on A, this delete event can be subscribed by B, and remove all data on B. 
 
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     ServerAItems.find().observe({
-            added: function (item) {
+        added: function (item) {
                 ...
-            },
-            removed: function (item) {
-                console.log('-- remote items removed--');
-                Meteor.call('delete');  // delete local data
-            }
-        });
+        },
+        removed: function (item) {
+            console.log('-- remote items removed--');
+            Meteor.call('delete');  // delete local data
+        }
+    });
 
-## Delete A <-//- B
+### Delete A <-//- B
 
 Server B can delete all data on B, BUT does not influence anything on Server A.
- 
+
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     Items.find().observe({
         added: function (item) {
             ...
@@ -99,11 +131,36 @@ Server B can delete all data on B, BUT does not influence anything on Server A.
         }
     });
 
+### Delete A <-- B
 
-## Insert A <-- B, and B only can read data of self 
+Server B can delete all data on B, BUT does not influence anything on Server A.
+
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
+    Items.find().observe({
+        added: function (item) {
+            ...
+        },
+        removed: function (item) {
+            console.log('-- local item removed--');
+            console.log(item);
+            
+            ServerAItems.remove({_id:item._id});
+        }
+    });
+
+## B only saw self date
+
+### Insert A <-- B, and B only can read data of self 
 
 Server-A publish data:
 
+    /////////////////////
+    // Code of server A
+    /////////////////////
+    
     if (Meteor.isServer) {
         Meteor.publish('remote-items', function (_author) {
             return Items.find({author:_author});
@@ -112,6 +169,10 @@ Server-A publish data:
     
 Server B subscribe data of B on A :
 
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     if (Meteor.isServer) {
     
         Meteor.startup(function () {
@@ -119,32 +180,23 @@ Server B subscribe data of B on A :
             remote.subscribe('remote-items', 'B');
         });
 
-## Delete A(B) <-- B
-
-Server-A allow remove:
-
-    Items.allow({
-        insert: function () {
-            return true;
-        },
-        remove: function () {
-            return true;
-        }
-    });
+### Delete A(B) <-- B
     
 Remove data of B on A
 
+    /////////////////////
+    // Code of server B
+    /////////////////////
+    
     Items.find().observe({
-            added: function (item) {
-                ...
-            },
-            removed: function (item) {
-                console.log('-- local item removed--');
-                console.log(item);
+    
+        removed: function (item) {
+            console.log('-- local item removed--');
+            console.log(item);
         
-                ServerAItems.remove({_id:item._id});
-            }
-        });
+            ServerAItems.remove({_id:item._id});
+        }
+    });
         
 
     

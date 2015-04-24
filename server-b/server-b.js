@@ -58,7 +58,8 @@ if (Meteor.isServer) {
 
     Meteor.startup(function () {
         Items.remove({});
-        remote.subscribe('remote-items', 'B');
+        //remote.subscribe('remote-items', 'B');
+        remote.subscribe('remote-items');
     });
 
     ServerAItems.find().observe({

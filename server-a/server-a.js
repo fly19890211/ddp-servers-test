@@ -43,11 +43,11 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-    //Meteor.publish('remote-items', function () {
-    //    return Items.find();
-    //})
-
-    Meteor.publish('remote-items', function (_author) {
-        return Items.find({author:_author});
+    Meteor.publish('remote-items', function () {
+        return Items.find();
     })
+
+    //Meteor.publish('remote-items', function (_author) {
+    //    return Items.find({author:_author});
+    //})
 }
